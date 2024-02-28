@@ -3,6 +3,7 @@ from .forms import RegistrationForm
 from .models import Account
 from django.contrib import messages,auth
 from django.contrib.auth.decorators import login_required
+from  .models import generate_otp,send_otp_email
 
 # email verification
 from django.contrib.sites.shortcuts import get_current_site
@@ -12,12 +13,18 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
 
+#otp
+import random
+from django.conf import settings
+from django.utils.encoding import force_text
+
 # Create your views here.
 
 def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
+            # Generate OTP
             first_name = form.cleaned_data['first_name']
             last_name = form.cleaned_data['last_name']
             phone_number = form.cleaned_data['phone_number']
@@ -26,28 +33,10 @@ def register(request):
             username = email.split("@")[0]
             user = Account.objects.create_user(first_name=first_name, last_name=last_name, email=email, username=username, password=password)
             user.phone_number = phone_number
-            user.save()
+            p = generate_otp(user)
+            send_otp_email(user, p)
+            return redirect("enterotp", user.id)
             
-            # USER ACTIVATION
-            current_site = get_current_site(request)
-            mail_subject = 'Please activate your account'
-            message = render_to_string('accounts/account_verification_email.html', {
-                'user': user,
-                'domain': current_site,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                'token': default_token_generator.make_token(user),
-            })
-            to_email = email
-            send_email = EmailMessage(mail_subject, message, to=[to_email])
-            send_email.send()
-            # messages.success(request, 'Thank you for registering with us. We have sent you a verification email to your email address [rathan.kumar@gmail.com]. Please verify it.')
-            return redirect('/accounts/login/?command=verification&email='+email)
-
-
-
-
-            messages.success(request,'Registration successful.')
-            return redirect('register')
     else:
         form = RegistrationForm()
     context = {
@@ -75,5 +64,55 @@ def logout(request):
     messages.success(request, 'You are logged out.')
     return redirect('login')
 
-def activate():
-    return redirect('register')
+
+def enterotp(request, id):
+    # Check if the request method is POST
+    if request.method == "POST":
+        # Retrieve the entered OTP from the form
+        entered_otp = request.POST.get("otp")
+        
+        try:
+            # Retrieve the user with the given ID from the database
+            user = Account.objects.get(id=id)
+            
+            # Compare the entered OTP with the stored OTP
+            if entered_otp == user.otp_fld:
+                # If OTPs match, mark the user as verified
+                user.is_verified = True
+                user.save()
+                
+                # Redirect to the login page with a success message
+                messages.success(request, "OTP verified successfully. You can now log in.")
+                return redirect('login')
+            else:
+                # If OTPs don't match, display an error message
+                messages.error(request, "Invalid OTP. Please try again.")
+                return redirect('enterotp', id=id)
+        except Account.DoesNotExist:
+            # If the user with the given ID doesn't exist, display an error message
+            messages.error(request, "User not found.")
+            return redirect('enterotp', id=id)
+    
+    # If the request method is not POST or if it's the initial GET request, render the OTP submission page
+    return render(request, 'accounts/otp.html', {'id': id})
+# views.py
+
+
+def otp_verification(request, id):
+    if request.method == "POST":
+        account = Account.objects.get(id=id)
+        otp = account.otp_fld
+        entered_otp = request.POST.get("otp")
+        otp = int(otp)
+        entered_otp = int(entered_otp)
+        if entered_otp == otp:
+            user = Account.objects.get(id=id)
+            user.is_active = True
+            user.save()
+            messages.success(request, "Email verified successfully. You can now log in.")
+            return redirect('login')
+        else:
+            messages.error(request, "Invalid OTP. Please try again.")
+            return redirect('enterotp', id=id)  # Corrected redirection
+
+    return render(request, 'enterotp')

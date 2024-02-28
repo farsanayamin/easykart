@@ -9,6 +9,7 @@ class Product(models.Model):
     description     =models.CharField(max_length=200, blank=True)
     price           =models.IntegerField()
     images          =models.ImageField(upload_to='photos/products')
+    #images = models.ManyToManyField('ProductImage')
     stock           =models.IntegerField()
     is_available    =models.BooleanField(default=True)
     category        =models.ForeignKey(Category, on_delete=models.CASCADE)

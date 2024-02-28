@@ -1,5 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+import pyotp
+from django.core.mail import send_mail
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+import datetime
+
 
 # Create your models here.
 class MyAccountManager(BaseUserManager):
@@ -48,6 +54,10 @@ class Account(AbstractBaseUser):
     username     = models.CharField(max_length=50, unique=True)
     email        = models.EmailField(max_length=100,unique=True)
     phone_number = models.CharField(max_length=50)
+    otp_fld = models.CharField(max_length=10, blank=True, null=True)
+    is_blocked = models.BooleanField(default=False)
+    otp_secret = models.CharField(max_length=200,null=True)
+    
 
     #required fieldes -custom model
     date_joined  = models.DateTimeField(auto_now_add=True)
@@ -70,3 +80,29 @@ class Account(AbstractBaseUser):
     
     def has_module_perms(self,add_label):
         return True
+    
+
+
+# otp generation
+def generate_otp(user):
+    secret_key = pyotp.random_base32()
+    otp = pyotp.TOTP(secret_key,interval=60)
+    otp_code = otp.now()
+    Account.objects.update(otp_secret=secret_key, otp_fld=otp_code)
+    return otp_code
+
+
+# Send OTP email
+def send_otp_email(instance, otp_code):
+    subject = "OTP Verification"
+    message = f"Your OTP for verification is: {otp_code}"
+    from_email = "ksajeer12@gmail.com"  # Replace with your email
+    send_mail(subject, message, from_email, [instance.email])
+
+
+# signal to post save
+@receiver(post_save, sender=Account)
+def generate_and_send_otp(sender, instance, created, **kwargs):
+    if created:
+        otp_code = generate_otp(instance)
+        send_otp_email(instance, otp_code)

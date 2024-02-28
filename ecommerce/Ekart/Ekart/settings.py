@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'category',
     'accounts',
     'store',
+    'adminoperations'
 ]
 
 MIDDLEWARE = [
@@ -136,8 +137,10 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
 
+OTP_LENGTH = 6
+
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'ksajeer12@gmail.com'
-EMAIL_HOST_PASSWORD = 'Kodakkatt@786!'
+EMAIL_HOST_PASSWORD = 'udqqgfcgiisggdjb'
 EMAIL_USE_TLS = True

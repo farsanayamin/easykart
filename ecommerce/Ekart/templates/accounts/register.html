@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
 
 <section class="section-content padding-y">
@@ -10,7 +9,7 @@
       <article class="card-body">
         {% include 'includes/alerts.html' %}
 		<header class="mb-4"><h4 class="card-title">Sign up</h4></header>
-		<form action="{% url 'register' %}" method="POST">
+		<form id="registrationForm" action="{% url 'register' %}" method="POST">
       {% csrf_token %}
 
 
@@ -63,3 +62,43 @@
 </section>
 
 {% endblock %}
+
+<!--validation-->
+<script>
+    document.getElementById('registrationForm').addEventListener('submit', function(event) {
+        var password = document.getElementById('id_password').value;
+        var confirmPassword = document.getElementById('id_confirm_password').value;
+        var phoneNumber = document.getElementById('id_phone_number').value;
+
+        // Check if password meets minimum length requirement
+        if (password.length < 8) {
+            alert("Password must be at least 8 characters long.");
+            event.preventDefault(); // Prevent form submission
+            return;
+        }
+
+        // Check if passwords match
+        if (password !== confirmPassword) {
+            alert("Passwords do not match.");
+            event.preventDefault(); // Prevent form submission
+            return;
+        }
+
+        // Check if phone number has exactly 10 digits
+        if (phoneNumber.replace(/\D/g, '').length !== 10) {
+            alert("Phone number must be 10 digits long.");
+            event.preventDefault(); // Prevent form submission
+            return;
+        }
+
+        // Check for spaces or special characters in fields
+        var fields = [password, confirmPassword, phoneNumber];
+        for (var i = 0; i < fields.length; i++) {
+            if (/\s/.test(fields[i]) || /[^a-zA-Z0-9]/.test(fields[i])) {
+                alert("Fields cannot contain spaces or special characters.");
+                event.preventDefault(); // Prevent form submission
+                return;
+            }
+        }
+    });
+</script>
