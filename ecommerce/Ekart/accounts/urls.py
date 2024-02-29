@@ -11,4 +11,5 @@ urlpatterns = [
     #path('otpsubmition/<int:id>/', views.otp_verification, name='enterotp'),
     path('otpsubmission/enter/<int:id>/', views.enterotp, name='enterotp'),
     path('otpsubmission/verify/<int:id>/', views.otp_verification, name='otp_verification'),
+    path('resendotp/<int:id>/',views.resendotp,name='resendotp' )
 ]

@@ -57,6 +57,7 @@ class Account(AbstractBaseUser):
     otp_fld = models.CharField(max_length=10, blank=True, null=True)
     is_blocked = models.BooleanField(default=False)
     otp_secret = models.CharField(max_length=200,null=True)
+    otp_expiry_time = models.DateTimeField(blank=True, null=True)
     
 
     #required fieldes -custom model
@@ -82,7 +83,7 @@ class Account(AbstractBaseUser):
         return True
     
 
-
+'''
 # otp generation
 def generate_otp(user):
     secret_key = pyotp.random_base32()
@@ -97,7 +98,7 @@ def send_otp_email(instance, otp_code):
     subject = "OTP Verification"
     message = f"Your OTP for verification is: {otp_code}"
     from_email = "ksajeer12@gmail.com"  # Replace with your email
-    send_mail(subject, message, from_email, [instance.email])
+    send_mail(subject, message, from_email, [instance.emaifl])
 
 
 # signal to post save
@@ -106,3 +107,46 @@ def generate_and_send_otp(sender, instance, created, **kwargs):
     if created:
         otp_code = generate_otp(instance)
         send_otp_email(instance, otp_code)
+
+'''
+
+from datetime import datetime, timedelta
+from pyotp import TOTP
+from django.core.mail import send_mail
+from .models import Account
+import pyotp
+
+# OTP generation
+def generate_otp(user):
+    secret_key = pyotp.random_base32()
+    otp = pyotp.TOTP(secret_key, interval=60)
+    otp_code = otp.now()
+    user.otp_secret = secret_key
+    user.otp_fld = otp_code
+    # Set the OTP expiry time (e.g., 5 minutes from now)
+    user.otp_expiry_time = timezone.now() + timezone.timedelta(minutes=5)
+    # Save the user object
+    user.save()
+    return otp_code
+
+# Send OTP email
+def send_otp_email(instance, otp_code):
+    subject = "OTP Verification"
+    message = f"Your OTP for verification is: {otp_code}"
+    from_email = "ksajeer12@gmail.com"  # Replace with your email
+    send_mail(subject, message, from_email, [instance.email])
+
+# Verify OTP
+def verify_otp(user, otp_code):
+    secret_key = user.otp_secret
+    otp = TOTP(secret_key, interval=60)
+    return otp.verify(otp_code)
+
+# Identify expired OTP
+from django.utils import timezone
+
+def is_otp_expired(account):
+    current_time = timezone.now()
+    otp_expiry_time = account.date_joined + timezone.timedelta(minutes=5)  # Adjust as needed
+    
+    return current_time > otp_expiry_time

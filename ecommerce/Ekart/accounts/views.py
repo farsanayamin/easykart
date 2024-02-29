@@ -3,7 +3,7 @@ from .forms import RegistrationForm
 from .models import Account
 from django.contrib import messages,auth
 from django.contrib.auth.decorators import login_required
-from  .models import generate_otp,send_otp_email
+from  .models import generate_otp,send_otp_email,is_otp_expired,verify_otp
 
 # email verification
 from django.contrib.sites.shortcuts import get_current_site
@@ -97,7 +97,7 @@ def enterotp(request, id):
     return render(request, 'accounts/otp.html', {'id': id})
 # views.py
 
-
+'''
 def otp_verification(request, id):
     if request.method == "POST":
         account = Account.objects.get(id=id)
@@ -116,3 +116,50 @@ def otp_verification(request, id):
             return redirect('enterotp', id=id)  # Corrected redirection
 
     return render(request, 'enterotp')
+'''
+from django.utils import timezone
+
+def otp_verification(request, id):
+    if request.method == "POST":
+        account = Account.objects.get(id=id)
+        entered_otp = request.POST.get("otp")
+        
+        if is_otp_expired(account):
+            messages.error(request, "OTP has expired generate new one.", extra_tags='expire')
+            #print(messages.tags)
+            return redirect('enterotp', id=id)
+        
+        otp_verified = verify_otp(account, entered_otp)
+        
+        if otp_verified:
+            account.is_active = True
+            account.save()
+            messages.success(request, "Email verified successfully. You can now log in.")
+            return redirect('login')
+        else:
+            messages.error(request, "error:Invalid OTP. Please try again.")
+            return redirect('enterotp', id=id)  
+
+    return render(request, 'otp.html')
+
+# resend otp
+def resendotp(request, id):
+    try:
+        # Retrieve the user with the given ID from the database
+        user = Account.objects.get(id=id)
+        
+        # Generate a new OTP
+        new_otp = generate_otp(user)
+        
+        # Send the new OTP via email
+        send_otp_email(user, new_otp)
+        
+        # Redirect to the enterotp page with a success message
+        messages.success(request, "OTP has been resent successfully.")
+        return redirect('otp_verification', id=id)
+    
+    except Account.DoesNotExist:
+        # If the user with the given ID doesn't exist, display an error message
+        messages.error(request, "User not found.")
+        return redirect('enterotp', id=id)
+
