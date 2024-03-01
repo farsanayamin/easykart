@@ -67,32 +67,6 @@ def logout(request):
 
 def enterotp(request, id):
     # Check if the request method is POST
-    if request.method == "POST":
-        # Retrieve the entered OTP from the form
-        entered_otp = request.POST.get("otp")
-        
-        try:
-            # Retrieve the user with the given ID from the database
-            user = Account.objects.get(id=id)
-            
-            # Compare the entered OTP with the stored OTP
-            if entered_otp == user.otp_fld:
-                # If OTPs match, mark the user as verified
-                user.is_verified = True
-                user.save()
-                
-                # Redirect to the login page with a success message
-                messages.success(request, "OTP verified successfully. You can now log in.")
-                return redirect('login')
-            else:
-                # If OTPs don't match, display an error message
-                messages.error(request, "Invalid OTP. Please try again.")
-                return redirect('enterotp', id=id)
-        except Account.DoesNotExist:
-            # If the user with the given ID doesn't exist, display an error message
-            messages.error(request, "User not found.")
-            return redirect('enterotp', id=id)
-    
     # If the request method is not POST or if it's the initial GET request, render the OTP submission page
     return render(request, 'accounts/otp.html', {'id': id})
 # views.py
@@ -123,14 +97,16 @@ def otp_verification(request, id):
     if request.method == "POST":
         account = Account.objects.get(id=id)
         entered_otp = request.POST.get("otp")
+        print(entered_otp)
         
         if is_otp_expired(account):
             messages.error(request, "OTP has expired generate new one.", extra_tags='expire')
             #print(messages.tags)
             return redirect('enterotp', id=id)
-        
+        print("Generated OTP:", entered_otp)
+        print("User:", account)
         otp_verified = verify_otp(account, entered_otp)
-        
+        print("otp_verifird:",otp_verified)
         if otp_verified:
             account.is_active = True
             account.save()
@@ -140,26 +116,25 @@ def otp_verification(request, id):
             messages.error(request, "error:Invalid OTP. Please try again.")
             return redirect('enterotp', id=id)  
 
-    return render(request, 'otp.html')
+    return render(request, 'accounts/otp.html')
 
 # resend otp
 def resendotp(request, id):
     try:
         # Retrieve the user with the given ID from the database
         user = Account.objects.get(id=id)
+        user.date_joined = timezone.now()
         
         # Generate a new OTP
         new_otp = generate_otp(user)
-        
+       
         # Send the new OTP via email
         send_otp_email(user, new_otp)
         
-        # Redirect to the enterotp page with a success message
-        messages.success(request, "OTP has been resent successfully.")
-        return redirect('otp_verification', id=id)
+        # Redirect to the enterotp page with the user ID
+        return redirect('enterotp', id=id)
     
     except Account.DoesNotExist:
         # If the user with the given ID doesn't exist, display an error message
         messages.error(request, "User not found.")
         return redirect('enterotp', id=id)
-

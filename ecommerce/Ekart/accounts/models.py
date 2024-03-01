@@ -125,6 +125,8 @@ def generate_otp(user):
     user.otp_fld = otp_code
     # Set the OTP expiry time (e.g., 5 minutes from now)
     user.otp_expiry_time = timezone.now() + timezone.timedelta(minutes=5)
+    print("model-Generated OTP:", otp_code)
+    print("model-User:", user)
     # Save the user object
     user.save()
     return otp_code
