@@ -21,7 +21,11 @@
 {% endif %}
 
 
-<form method="post" action="{% url 'otp_verification' id=id %}">
+{% if not reset %}
+<form method="post" action="{% url 'otp_verification' id=id reset='False' %}">
+{% else %}
+<form method="post" action="{% url 'otp_verification' id=id reset='True' %}">
+{% endif %}
     {% csrf_token %}
     <label for="otp">OTP:</label>
     <input type="text" id="otp" name="otp" required>

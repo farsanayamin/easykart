@@ -76,30 +76,29 @@ def logout(request):
 
 
 @never_cache
-def otp_verification(request, id):
+def otp_verification(request, id , reset=None):
     if request.method == "POST":
         account = Account.objects.get(id=id)
         entered_otp = request.POST.get("otp")
-        print("Entered OTP:", entered_otp)
         
         if is_otp_expired(account):
             messages.error(request, "OTP has expired, please generate a new one.")
             return redirect('otp_verification', id=id)
         
-        print("Generated OTP:", account.otp_fld)
         otp_verified = verify_otp(account, entered_otp)
-        print("OTP Verified:", otp_verified)
         
         if otp_verified:
-            account.is_active = True
-            account.save()
-            messages.success(request, "Email verified successfully. You can now log in.")
-            return redirect('login')
+            if reset:
+                # OTP verification for password reset
+                return redirect("reset_password", id=id)  # Redirect to password reset page
+            else:
+                return redirect("login")  # Redirect to login page if not resetting password
         else:
             messages.error(request, "Invalid OTP. Please try again.")
-            return redirect('otp_verification', id=id)  
+            return render(request, 'accounts/reset_password.html', {'id': account.id})  
 
-    return render(request, 'accounts/otp.html', {'id': id})
+    return render(request, 'accounts/otp.html', {'id': id, 'reset': reset})
+
 
 # resend otp
 @never_cache
@@ -131,11 +130,13 @@ def resendotp(request, id):
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import Account, generate_otp, send_otp_email, verify_otp
+from django.urls import reverse
 
 @never_cache
 def forgotPassword(request):
     if request.method == "POST":
         email = request.POST.get("email")
+        reset =True
         try:
             user = Account.objects.get(email=email)
         except Account.DoesNotExist:
@@ -147,7 +148,11 @@ def forgotPassword(request):
         
         # Send OTP via email
         send_otp_email(user, otp_code)
-        return redirect("otp_verification", id=user.id)
+     
+        redirect_url = reverse("otp_verification", kwargs={'id': user.id, 'reset': True})
+        print("Redirect URL:", redirect_url)
+        return redirect(redirect_url)
+        
         
         # Verify OTP
         '''
@@ -161,8 +166,14 @@ def forgotPassword(request):
 '''
     return render(request, "accounts/forgotPassword.html")
 
+from django.shortcuts import render, get_object_or_404
+from django.views.decorators.cache import never_cache
+from .models import Account
+
+
 @never_cache
-def reset_password(request):
-    pass
+def reset_password(request, id):
+    user = get_object_or_404(Account, id=id)
+    return render(request, 'accounts/reset_password.html', {'id': user.id})
 
     
