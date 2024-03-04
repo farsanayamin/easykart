@@ -9,7 +9,9 @@ urlpatterns = [
     #path('accounts/activate/<str:uidb64>/<str:token>/',views.activate,name='activate'),
     #path('otpsubmition/<int:id>/', views.enterotp, name='enterotp'),
     #path('otpsubmition/<int:id>/', views.otp_verification, name='enterotp'),
-    path('otpsubmission/enter/<int:id>/', views.enterotp, name='enterotp'),
+    #path('otpsubmission/enter/<int:id>/', views.enterotp, name='enterotp'),
     path('otpsubmission/verify/<int:id>/', views.otp_verification, name='otp_verification'),
-    path('resendotp/<int:id>/',views.resendotp,name='resendotp' )
+    path('resendotp/<int:id>/',views.resendotp,name='resendotp' ),
+    path('forgotPassword/',views.forgotPassword, name='forgotPassword'),
+    path('reset_password/<int:id>/', views.reset_password, name='reset_password'),
 ]
