@@ -149,6 +149,8 @@ def verify_otp(user, otp_code):
     otp = TOTP(secret_key, interval=60)
     verification_result = otp.verify(otp_code)
     print("Verification Result:", verification_result)
+    user.is_active = True
+    user.save()
     return verification_result
 
 

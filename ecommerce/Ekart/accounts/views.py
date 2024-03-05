@@ -22,7 +22,7 @@ from django.utils.encoding import force_text
 
 # Create your views here.
 @never_cache
-def register(request):
+def register(request, reset=None):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
@@ -37,7 +37,7 @@ def register(request):
             user.phone_number = phone_number
             p = generate_otp(user)
             send_otp_email(user, p)
-            return redirect("otp_verification", id=user.id)
+            return redirect("otp_verification", id=user.id,  reset=None)
             
     else:
         form = RegistrationForm()
@@ -88,17 +88,16 @@ def otp_verification(request, id , reset=None):
         otp_verified = verify_otp(account, entered_otp)
         
         if otp_verified:
-            if reset:
+            if reset == True:
                 # OTP verification for password reset
                 return redirect("reset_password", id=id)  # Redirect to password reset page
             else:
                 return redirect("login")  # Redirect to login page if not resetting password
         else:
             messages.error(request, "Invalid OTP. Please try again.")
-            return render(request, 'accounts/reset_password.html', {'id': account.id})  
+            return render(request, 'accounts/reset_password.html', {'id': account.id, 'reset': reset})  
 
     return render(request, 'accounts/otp.html', {'id': id, 'reset': reset})
-
 
 # resend otp
 @never_cache
@@ -170,10 +169,34 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import never_cache
 from .models import Account
 
-
+'''
 @never_cache
 def reset_password(request, id):
     user = get_object_or_404(Account, id=id)
     return render(request, 'accounts/reset_password.html', {'id': user.id})
 
-    
+ '''   
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.hashers import make_password
+from .models import Account
+
+def reset_password(request, id):
+    if request.method == 'POST':
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        if password == confirm_password:
+            user = get_object_or_404(Account, id=id)
+            user.password = make_password(password)  # Update the user's password
+            user.save()
+            
+            messages.success(request, 'Password reset successfully. Please login with your new password.')
+            return redirect('login')  # Redirect to the login page
+        else:
+            messages.error(request, 'Passwords do not match. Please try again.')
+            return redirect('reset_password', id=id)  # Redirect back to the reset password page with the user id
+        
+    else:
+        user = get_object_or_404(Account, id=id)
+        return render(request, 'accounts/reset_password.html', {'id': user.id})
