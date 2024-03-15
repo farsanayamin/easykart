@@ -60,6 +60,10 @@ class Account(AbstractBaseUser):
     otp_secret = models.CharField(max_length=200,null=True)
     otp_created = models.DateTimeField(auto_now_add=True)
     otp_expiry_time = models.DateTimeField(blank=True, null=True)
+    #profile = models.ImageField(upload_to="images/", null=True, blank=True)
+    #is_verified = models.BooleanField(default=False)
+    #referral_link = models.CharField(max_length=255, unique=True)
+
     
 
     #required fieldes -custom model
@@ -149,8 +153,6 @@ def verify_otp(user, otp_code):
     otp = TOTP(secret_key, interval=60)
     verification_result = otp.verify(otp_code)
     print("Verification Result:", verification_result)
-    user.is_active = True
-    user.save()
     return verification_result
 
 
