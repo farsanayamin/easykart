@@ -4,101 +4,105 @@
 
 <section class="section-content padding-y">
 
-<!-- ============================ COMPONENT REGISTER   ================================= -->
-	<div class="card mx-auto" style="max-width:520px; margin-top:40px;">
-      <article class="card-body">
-        {% include 'includes/alerts.html' %}
-		<header class="mb-4"><h4 class="card-title">Sign up</h4></header>
-		<form id="registrationForm" action="{% url 'register' %}" method="POST">
-      {% csrf_token %}
+    <!-- ============================ COMPONENT REGISTER   ================================= -->
+    <div class="card mx-auto" style="max-width:520px; margin-top:40px;">
+        <article class="card-body">
+            {% include 'includes/alerts.html' %}
+            <header class="mb-4"><h4 class="card-title">Sign up</h4></header>
+            <form id="registrationForm" action="{% url 'register' %}" method="POST">
+                {% csrf_token %}
 
+                <div class="form-row">
+                    <div class="col form-group">
+                        <label for="id_first_name">First name</label>
+                        {{ form.first_name }}
+                    </div> <!-- form-group end.// -->
+                    <div class="col form-group">
+                        <label for="id_last_name">Last name</label>
+                        {{ form.last_name }}
+                    </div> <!-- form-group end.// -->
+                </div> <!-- form-row end.// -->
 
-				<div class="form-row">
-					<div class="col form-group">
-						<label>First name</label>
-					  	{{ form.first_name }}
-					</div> <!-- form-group end.// -->
-					<div class="col form-group">
-						<label>Last name</label>
-					  	{{ form.last_name }}
-					</div> <!-- form-group end.// -->
-				</div> <!-- form-row end.// -->
-
-
-				<div class="form-row">
-					<div class="form-group col-md-6">
-					  <label>Email Address</label>
-					  {{form.email}}
-					</div> <!-- form-group end.// -->
-					<div class="form-group col-md-6">
-					  <label>Phone Number</label>
-					  {{form.phone_number}}
-					</div> <!-- form-group end.// -->
-				</div> <!-- form-row.// -->
-				<div class="form-row">
-					<div class="form-group col-md-6">
-						<label>Create password</label>
-					    {{ form.password }}
-					</div> <!-- form-group end.// -->
-					<div class="form-group col-md-6">
-						<label>Repeat password</label>
-            {{form.confirm_password}}
-					</div> <!-- form-group end.// -->
-				</div>
-			    <div class="form-group">
-			        <button type="submit" class="btn btn-primary btn-block"> Register  </button>
-			    </div> <!-- form-group// -->
-      {{ form.email.errors }}
-      {{form.phone_number.errors}}
-      {{ form.non_field_errors }}
-			</form>
-		</article><!-- card-body.// -->
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="id_email">Email Address</label>
+                        {{ form.email }}
+                    </div> <!-- form-group end.// -->
+                    <div class="form-group col-md-6">
+                        <label for="id_phone_number">Phone Number</label>
+                        {{ form.phone_number }}
+                    </div> <!-- form-group end.// -->
+                </div> <!-- form-row.// -->
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="id_password">Create password</label>
+                        {{ form.password }}
+                    </div> <!-- form-group end.// -->
+                    <div class="form-group col-md-6">
+                        <label for="id_confirm_password">Repeat password</label>
+                        {{ form.confirm_password }}
+                    </div> <!-- form-group end.// -->
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-block"> Register </button>
+                </div> <!-- form-group// -->
+            </form>
+            <div id="validationErrors" class="alert alert-danger" style="display: none;"></div> <!-- Placeholder for validation errors -->
+        </article><!-- card-body.// -->
     </div> <!-- card .// -->
     <p class="text-center mt-4">Have an account? <a href="{% url 'login' %}">Log In</a></p>
     <br><br>
-<!-- ============================ COMPONENT REGISTER  END.// ================================= -->
+    <!-- ============================ COMPONENT REGISTER  END.// ================================= -->
 
-
+    <!--validation-->
+    <script>
+        document.getElementById('registrationForm').addEventListener('submit', function(event) {
+            var password = document.getElementById('id_password').value;
+            var confirmPassword = document.getElementById('id_confirm_password').value;
+            var phoneNumber = document.getElementById('id_phone_number').value;
+            var firstName = document.getElementById('id_first_name').value;
+            var lastName = document.getElementById('id_last_name').value;
+            var validationErrors = ''; // Placeholder for validation errors
+    
+            // Check if password meets minimum length requirement
+            if (password.length < 8) {
+                validationErrors += "- Password must be at least 8 characters long.\n";
+            }
+    
+            // Check if passwords match
+            if (password !== confirmPassword) {
+                validationErrors += "- Passwords do not match.\n";
+            }
+    
+            // Check if phone number has exactly 10 digits
+            if (phoneNumber.replace(/\D/g, '').length !== 10) {
+                validationErrors += "- Phone number must be 10 digits long.\n";
+            }
+    
+            // Check for spaces or special characters in first name
+            if (/\s/.test(firstName) || /[^a-zA-Z]/.test(firstName)) {
+                validationErrors += "- First name cannot contain spaces or special characters.\n";
+            }
+    
+            // Check for spaces or special characters in last name
+            if (/\s/.test(lastName) || /[^a-zA-Z]/.test(lastName)) {
+                validationErrors += "- Last name cannot contain spaces or special characters.\n";
+            }
+    
+            // Display validation errors if any
+            if (validationErrors !== '') {
+                document.getElementById('validationErrors').innerHTML = '<ul><li>' + validationErrors.replace(/\n/g, '</li><li>') + '</li></ul>';
+                document.getElementById('validationErrors').style.display = 'block';
+                event.preventDefault(); // Prevent form submission
+            } else {
+                // If no validation errors, clear any existing error messages
+                document.getElementById('validationErrors').innerHTML = ''; // Clear any existing error messages
+                document.getElementById('validationErrors').style.display = 'none'; // Hide the error container
+            }
+        });
+    </script>
+    
+    
 </section>
 
 {% endblock %}
-
-<!--validation-->
-<script>
-    document.getElementById('registrationForm').addEventListener('submit', function(event) {
-        var password = document.getElementById('id_password').value;
-        var confirmPassword = document.getElementById('id_confirm_password').value;
-        var phoneNumber = document.getElementById('id_phone_number').value;
-
-        // Check if password meets minimum length requirement
-        if (password.length < 8) {
-            alert("Password must be at least 8 characters long.");
-            event.preventDefault(); // Prevent form submission
-            return;
-        }
-
-        // Check if passwords match
-        if (password !== confirmPassword) {
-            alert("Passwords do not match.");
-            event.preventDefault(); // Prevent form submission
-            return;
-        }
-
-        // Check if phone number has exactly 10 digits
-        if (phoneNumber.replace(/\D/g, '').length !== 10) {
-            alert("Phone number must be 10 digits long.");
-            event.preventDefault(); // Prevent form submission
-            return;
-        }
-
-        // Check for spaces or special characters in fields
-        var fields = [password, confirmPassword, phoneNumber];
-        for (var i = 0; i < fields.length; i++) {
-            if (/\s/.test(fields[i]) || /[^a-zA-Z0-9]/.test(fields[i])) {
-                alert("Fields cannot contain spaces or special characters.");
-                event.preventDefault(); // Prevent form submission
-                return;
-            }
-        }
-    });
-</script>

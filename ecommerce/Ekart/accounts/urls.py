@@ -13,5 +13,8 @@ urlpatterns = [
     path('otpsubmission/verify/<int:id>/', views.otp_verification, name='otp_verification'),
     path('resendotp/<int:id>/',views.resendotp,name='resendotp' ),
     path('forgotPassword/',views.forgotPassword, name='forgotPassword'),
-    path('reset_password/<int:id>/', views.reset_password, name='reset_password'),
+    #path('forgotPassword/otp/<int:id>/', views.otp_verification_forgot,name ='otp_verification_forgot'),
+    path('otp_password/<int:id>/<str:otp_verified>/', views.otp_password, name='otp_password'),
+    path('reset_password/<int:id>/<str:otp_verified>/', views.reset_password, name='reset_password'),
+    
 ]
