@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.views.decorators.cache import never_cache
 from accounts.models import Account
+from store.models import Product,Variation
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate
@@ -104,3 +105,13 @@ def search_for_user(request):
             }
         return render(request, "admin/user_management.html", context)
 
+#product manage
+def product_manage(request):
+    if request.user.is_authenticated:
+        obj = Product.objects.select_related("category").all().order_by("-id")
+        variants = Variation.objects.all()
+        context = {"items": obj, "variants": variants}
+        return render(request, "admin/product.html", context)
+    else:
+        return redirect("adminlogin")
+   

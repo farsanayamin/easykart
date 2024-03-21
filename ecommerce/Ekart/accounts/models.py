@@ -62,7 +62,7 @@ class Account(AbstractBaseUser):
     otp_expiry_time = models.DateTimeField(blank=True, null=True)
     #profile = models.ImageField(upload_to="images/", null=True, blank=True)
     #is_verified = models.BooleanField(default=False)
-    #referral_link = models.CharField(max_length=255, unique=True)
+    #referral_link = models.CharField(max_length=255,unique=True)
 
     
 

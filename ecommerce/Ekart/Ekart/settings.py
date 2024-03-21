@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'category',
     'accounts',
     'store',
-    'adminoperations'
+    'adminoperations',
+    'carts',
 ]
 
 MIDDLEWARE = [
@@ -66,7 +67,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'category.context_processors.menu_links',        
+                'category.context_processors.menu_links',
+                'carts.context_processors.counter',        
             ],
         },
     },
@@ -82,9 +84,13 @@ AUTH_USER_MODEL = 'accounts.Account'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'easykart_db',
+        'HOST' : 'localhost',
+        'PORT' : '5432',
+        'USER' : 'postgres',
+        'PASSWORD' : 'yamin'
+        }
 }
 
 
