@@ -4,10 +4,12 @@ from django.contrib.auth import authenticate, login
 from django.views.decorators.cache import never_cache
 from accounts.models import Account
 from store.models import Product,Variation
+from category.models import Category
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.views.decorators.cache import never_cache
+from django.shortcuts import get_object_or_404
 
 from django.http import HttpResponseServerError
 from datetime import date, timedelta
@@ -15,7 +17,7 @@ from django.db.models import Sum, Count
 from datetime import datetime
 from django.db.models import Q
 from datetime import datetime
-
+from category import models
 
 from django.db.models import Q
 
@@ -114,4 +116,155 @@ def product_manage(request):
         return render(request, "admin/product.html", context)
     else:
         return redirect("adminlogin")
+    
+
+
+
+  # Import your Category model
+
+from django.utils.text import slugify
+
+def add_product(request):
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            # Process POST request data
+            name = request.POST.get("name")
+            category_id = request.POST.get("category")
+            price = request.POST.get("price")
+            description = request.POST.get("description")
+            image = request.FILES.get("image")
+            stock = request.POST.get("stock")
+            is_available = request.POST.get('is_available', False)
+            print(name, category_id, price, description, image)
+            if name and category_id and price and description and image:
+                try:
+                    selected_category = Category.objects.get(id=category_id)
+                except Category.DoesNotExist:
+                    messages.error(request, "Invalid category")
+                    return render(request, "admin/add_product.html")
+
+                if int(price) > 0:
+                    if not Product.objects.filter(product_name=name).exists():
+                        # Generate slug from product_name
+                        slug = slugify(name)
+                        # Ensure slug is unique
+                        unique_slug = slug
+                        num = 1
+                        while Product.objects.filter(slug=unique_slug).exists():
+                            unique_slug = f"{slug}-{num}"
+                            num += 1
+
+                        obj = Product(
+                            product_name=name,
+                            slug=unique_slug,
+                            category=selected_category,
+                            price=price,
+                            description=description,
+                            images=image,
+                            stock=stock,
+                            is_available = is_available
+                        )
+                        obj.save()
+                        messages.success(request, "Product added successfully")
+                        return redirect("productmanage")  # Redirect to product management page
+                    else:
+                        messages.error(request, "Product already exists")
+                else:
+                    messages.error(request, "Price should be greater than 0")
+            else:
+                messages.error(request, "Please fill out all fields")
+
+        # Fetch categories from the database
+        categories = Category.objects.all()
+        return render(request, "admin/add_product.html", {'categories': categories})
+    else:
+        return redirect("adminlogin")  # Redirect to login page if user is not authenticated
+
+#edit product
+def edit_product(request, product_id):
+    if request.user.is_authenticated:
+        # Retrieve the product instance to be edited
+        product = get_object_or_404(Product, id=product_id)
+        
+        if request.method == "POST":
+            # Process POST request data
+            name = request.POST.get("name")
+            category_id = request.POST.get("category")
+            price = request.POST.get("price")
+            description = request.POST.get("description")
+            image = request.FILES.get("image")
+            stock = request.POST.get("stock")
+            is_available = request.POST.get('is_available', False)
+            
+            if name and category_id and price and description:
+                try:
+                    selected_category = Category.objects.get(id=category_id)
+                except Category.DoesNotExist:
+                    messages.error(request, "Invalid category")
+                    return render(request, "admin/edit_product.html", {'product': product})
+                
+                if int(price) > 0:
+                    product.product_name = name
+                    product.category = selected_category
+                    product.price = price
+                    product.description = description
+                    product.stock = stock
+                    product.is_available = is_available
+                    
+                    # Update image only if a new image is provided
+                    if image:
+                        product.images = image
+
+                    product.save()
+                    messages.success(request, "Product updated successfully")
+                    return redirect("productmanage")  # Redirect to product management page
+                else:
+                    messages.error(request, "Price should be greater than 0")
+            else:
+                messages.error(request, "Please fill out all fields")
+
+        # Fetch categories from the database
+        categories = Category.objects.all()
+        return render(request, "admin/edit_product.html", {'product': product, 'categories': categories, id:product_id})
+    else:
+        return redirect("adminlogin")  # Redirect to login page if user is not authenticated
+
+
+
+
+def list_product(request, id):
+    obj = Product.objects.get(id=id)
+    obj.is_available = True
+    obj.save()
+    return redirect("productmanage")
+
+def un_list_product(request, id):
+    obj = Product.objects.get(id=id)
+    obj.is_available = False
+    obj.save()
+    return redirect("productmanage")
+
+# delete product
+def delete_product(request, id):
+    Product.objects.get(id=id).delete()
+    messages.success(request, "product deleted successfully")
+    return redirect("adminproductmanage")
+
+'''
+# search for product
+def search_product(request):
+    if request.method == "POST":
+        query = request.POST["query"]
+        obj = Product.objects.filter(name__icontains=query)
+        variants = variant.objects.filter(product_id__name__icontains = query)
+        context = {"items": obj,"variants": variants}
+        return render(request, "product.html", context)
+'''
+
+
+def search_product(request,id):
+    pass
+    
+
+
    

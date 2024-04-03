@@ -288,7 +288,7 @@
 						<h2>Manage  products</h2>
 					</div>
 					  <div class=" col-6">
-				          <form method="POST" action="/searchforproduct/"class="form-inline col-6 my-2 my-lg-0">
+				          <form method="POST" action="/adminoperations/searchforproduct/"class="form-inline col-6 my-2 my-lg-0">
 							{% csrf_token %}
 							<input class="form-control mr-sm-2" type="search" placeholder="Search" name='query'>
 							<button class="butto1" type="submit">Search</button>
@@ -311,7 +311,7 @@
 						<th>image</th>
 						<th>actions</th>
 						<th></th>
-						<th>variant</th>
+						
 						
 
 
@@ -331,15 +331,15 @@
 						
                         <td>
 							
-                            <a href="/editproduct/{{i.id}}"><i class="material-icons"  title="Edit">&#xE254;</i></a>
+                            <a href="/adminoperations/editproduct/{{i.id}}"><i class="material-icons"  title="Edit">&#xE254;</i></a>
                            
 							</div>
 						</td>
 						<td>
-							{% if not i.is_listed %}
-                            <a href="/listproduct/{{i.id}}/" class=" btn btn-success"  data-toggle="modal">list</a>
+							{% if not i.is_available %}
+                            <a href="/adminoperations/listproduct/{{i.id}}/" class=" btn btn-success"  data-toggle="modal">list</a>
 							{% else %}
-                            <a href="/unlistproduct/{{i.id}}/" class="btn btn-danger " data-toggle="modal">unlist</a>
+                            <a href="/adminoperations/unlistproduct/{{i.id}}/" class="btn btn-danger " data-toggle="modal">unlist</a>
                              {% endif %}
                         </td>
 						<td>
@@ -469,8 +469,8 @@
 					{% endfor %}		
                 </tbody>
             </table>
-			<a href="/adminhome/" class="btn btn-danger"><i class="material-icons"></i> <span>back to admin home</span></a>	
-			<a href="/addproduct/" class="btn btn-success"><i class="material-icons"></i> <span>Add product</span></a>	
+			<a href="/adminoperations/adminhome/" class="btn btn-danger"><i class="material-icons"></i> <span>back to admin home</span></a>	
+			<a href="/adminoperations/addproduct/" class="btn btn-success"><i class="material-icons"></i> <span>Add product</span></a>	
 			
         </div>
     </div>
