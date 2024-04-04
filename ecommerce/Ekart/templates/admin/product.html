@@ -385,8 +385,72 @@
 									</div>
 								</div>
 							</div>
-						
-						
+							<td>    
+								<a href="" class="btn btn-primary" style="color: white !important;" type="button" data-toggle="modal" data-target="#VariantionModal{{i.id}}">
+									Variant Report
+								</a>
+							
+								<div class="modal fade " id="VariantionModal{{i.id}}" tabindex="-1" role="dialog" aria-labelledby="VariantionModalLabel{{i.id}}" aria-hidden="true">
+									<div class="modal-dialog modal-lg" role="document">
+										<div class="modal-content">
+											<div class="modal-header bg-success">
+												<h5 class="modal-title bg-success" id="VariantionModalLabel{{i.id}}">Variant Report for {{i.product_name}}</h5>
+												<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+													<span aria-hidden="true">&times;</span>
+												</button>
+											</div>
+											<div class="modal-body">
+												<!-- Variant cards -->
+												<div class="row">
+													{% for variant in i.variation_set.all %}
+													<div class="col-12 mb-3">
+														<div class="card border-primary custom-card">
+															<div class="card-body">
+																{% if variant.variation_category == 'color' %}
+																<h5 class="card-title">Color: {{ variant.variation_value }}</h5>
+																{% elif variant.variation_category == 'size' %}
+																<h5 class="card-title">Size: {{ variant.variation_value | upper }}</h5>
+																{% endif %}
+																<p>Quantity: {{ variant.quantity }}</p>
+															</div>
+															
+															<a href="" class="btn "  type="button" data-toggle="modal" data-target="#editvariant{{variant.id}}">
+																Edit variant
+															</a>
+							
+															<div id="editvariant{{variant.id}}" class="modal fade">
+																<div class="modal-dialog">
+																	<div class="modal-content">
+																		<form method='POST' action='/adminoperations/editvariantstock/{{variant.id}}/'>
+																			{% csrf_token %}
+																			<div class="modal-header">
+																				<h4 class="modal-title">Edit variant for {{ variant.variation_value }}</h4>
+																				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+																			</div>
+																			<div class="modal-body">
+																				<div class="form-group">
+																					<label>Quantity of the variant</label>
+																					<input type="number" class="form-control" value="{{ variant.quantity }}" name='qnty' required>
+																				</div>
+																			</div>
+																			<div class="modal-footer">
+																				<input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+																				<button type="submit" class="btn btn-success" value="Add">Submit</button>
+																			</div>
+																		</form>
+																	</div>
+																</div>
+															</div>
+														</div>
+													</div>
+													{% endfor %}
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</td>
+							
                     </tr>
 					{% endfor %}		
                 </tbody>

@@ -250,20 +250,19 @@ def delete_product(request, id):
     messages.success(request, "product deleted successfully")
     return redirect("adminproductmanage")
 
-'''
+
 # search for product
 def search_product(request):
     if request.method == "POST":
         query = request.POST["query"]
-        obj = Product.objects.filter(name__icontains=query)
-        variants = variant.objects.filter(product_id__name__icontains = query)
+        obj = Product.objects.filter(product_name__icontains=query)
+        variants = Variation.objects.filter(product_id__product_name__icontains = query)
         context = {"items": obj,"variants": variants}
-        return render(request, "product.html", context)
-'''
+        return render(request, "admin/product.html", context)
 
 
-def search_product(request,id):
-    pass
+
+
     
 
 
