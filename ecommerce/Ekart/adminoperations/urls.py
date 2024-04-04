@@ -9,5 +9,18 @@ urlpatterns = [
     path("blockuser/<str:id>", views.block_user, name="blockuser"),
     path("unblockuser/<str:id>", views.un_block_user, name="unblockuser"),
     path("searchuser/", views.search_for_user, name="searchuser"),
-    path("productmanage/",views.product_manage, name="productmanage")
+    path("productmanage/",views.product_manage, name="productmanage"),
+    path("addproduct/", views.add_product, name="addproduct"),
+    path("editproduct/<int:product_id>", views.edit_product, name="editproduct"),
+    path("searchforproduct/", views.search_product, name="searchforproduct"),
+    path("listproduct/<str:id>/", views.list_product, name="listproduct"),
+    path("unlistproduct/<str:id>/", views.un_list_product, name="unlistproduct"),
+    path("addvariant/<int:pro_id>/", views.add_variant, name="addvariant"),
+    path(
+        "editvariantstock/<str:var_id>/",
+        views.edit_variant_stock,
+        name="editvariantstock",
+    ),
+
+    
 ]

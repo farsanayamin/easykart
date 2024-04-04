@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Product Management by Admin</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<style>
+    /* Your CSS styles here */
+</style>
+</head>
+<body>
+
+<!-- navbar -->
+<nav class="custom-navbar navbar navbar-expand-md navbar-dark bg-dark hai" arial-label="Furni navigation bar">
+    <div class="container-fluid text-center">
+        <h1 class="m-auto text1">EasyKart</h1>
+    </div>
+</nav>
+
+{% if messages %}
+<div class="alert alert-success mt-3">
+{% for message in messages %}
+{{ message }}
+{% endfor %}
+</div>
+{% endif %}
+
+<div class="container-fluid">
+    <form class="form-horizontal" method="POST"  enctype="multipart/form-data">
+
+        {% csrf_token %}
+        <fieldset>
+            <!-- Form Name -->
+            <legend class="text-center">EDIT PRODUCTS</legend>
+
+            <!-- Text input -->
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="product_name">PRODUCT NAME</label>
+                <div class="col-md-4">
+                    <input id="product_name" name="name" placeholder="PRODUCT NAME" class="form-control input-md" required type="text" value="{{ product.product_name }}">
+                </div>
+            </div>
+
+            <!-- Select Basic -->
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="category">PRODUCT CATEGORY</label>
+                <div class="col-md-4">
+                    <select class="form-control" id="category" name="category">
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if category.id == product.category.id %} selected {% endif %}>{{ category.category_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Checkbox for is_available -->
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="is_available">PRODUCT IS LISTED</label>
+                <div class="col-md-4">
+                    <div class="checkbox">
+                        <label>
+                            <input id="is_available" name="is_available" type="checkbox" value="1" {% if product.is_available %} checked {% endif %}> Yes
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="stock">PRODUCT STOCK</label>
+                <div class="col-md-4">
+                    <input id="stock" name="stock" placeholder="PRODUCT STOCK" class="form-control input-md" required type="number" value="{{ product.stock }}">
+                </div>
+            </div>
+
+            <!-- Textarea -->
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="description">PRODUCT DESCRIPTION</label>
+                <div class="col-md-4">
+                    <textarea class="form-control" id="description" name="description">{{ product.description }}</textarea>
+                </div>
+            </div>
+
+            <!-- Price input -->
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="price">PRODUCT PRICE</label>
+                <div class="col-md-4">
+                    <input id="price" name="price" placeholder="PRODUCT PRICE" class="form-control input-md" required type="number" value="{{ product.price }}">
+                </div>
+            </div>
+
+            <!-- File input -->
+            <!-- File input -->
+<div class="form-group">
+    <label class="col-md-4 control-label" for="image">CURRENT PRODUCT IMAGE</label>
+    <div class="col-md-4">
+        {% if product.images %}
+            <img src="{{ product.images.url }}" class="img-thumbnail" alt="Product Image">
+        {% else %}
+            <p>No image available</p>
+        {% endif %}
+    </div>
+</div>
+<div class="form-group">
+    <label class="col-md-4 control-label" for="image">UPDATE PRODUCT IMAGE</label>
+    <div class="col-md-4">
+        <input type="file" name="image" class="form-control input-md" id="image" accept="image/*">
+    </div>
+</div>
+
+
+
+
+            <!-- Button -->
+            <div class="form-group">
+                <div class="col-md-4 col-md-offset-4">
+                    <button id="submit_button" name="submit_button" class="btn btn-lg btn-primary">Edit</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</body>
+</html>
