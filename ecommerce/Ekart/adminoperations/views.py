@@ -250,21 +250,80 @@ def delete_product(request, id):
     messages.success(request, "product deleted successfully")
     return redirect("adminproductmanage")
 
-'''
+
 # search for product
 def search_product(request):
     if request.method == "POST":
         query = request.POST["query"]
-        obj = Product.objects.filter(name__icontains=query)
-        variants = variant.objects.filter(product_id__name__icontains = query)
+        obj = Product.objects.filter(product_name__icontains=query)
+        variants = Variation.objects.filter(product_id__product_name__icontains = query)
         context = {"items": obj,"variants": variants}
-        return render(request, "product.html", context)
-'''
+        return render(request, "admin/product.html", context)
 
 
-def search_product(request,id):
-    pass
+
+
     
 
+
+# add variant
+from django.shortcuts import redirect, get_object_or_404
+from django.contrib import messages
+from store.models import Variation, Product
+
+
+def add_variant(request, pro_id):
+    if request.method == "POST":
+        product = get_object_or_404(Product, id=pro_id)
+        color = request.POST.get("color")
+        size = request.POST.get("size")
+        stock = int(request.POST.get("qnty"))
+        
+        if color:
+            if not Variation.objects.filter(variation_category='color', variation_value=color, product=product).exists():
+                if stock >= 0:
+                    Variation.objects.create(product=product, variation_category='color', variation_value=color, is_active=True)
+                    messages.success(request, "Color variant added successfully.")
+                else:
+                    messages.error(request, "The quantity is invalid.")
+            else:
+                messages.error(request, "The color variant is already added, please update it.")
+        else:
+            messages.error(request, "Color is required.")
+
+        if size:
+            if not Variation.objects.filter(variation_category='size', variation_value=size, product=product).exists():
+                if stock >= 0:
+                    Variation.objects.create(product=product, variation_category='size', variation_value=size, is_active=True)
+                    messages.success(request, "Size variant added successfully.")
+                else:
+                    messages.error(request, "The quantity is invalid.")
+            else:
+                messages.error(request, "The size variant is already added, please update it.")
+        else:
+            messages.error(request, "Size is required.")
+        
+        return redirect("productmanage")
+    
+   
+
+
+
+# variant quantity updatin
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from store.models import Variation
+
+def edit_variant_stock(request, var_id):
+    if request.method == "POST":
+        quantity = int(request.POST["qnty"])
+        if quantity > 0:
+            obj = Variation.objects.get(id=var_id)
+            obj.quantity = quantity
+            obj.save()
+            messages.success(request, "Variant quantity updated successfully.")
+        else:
+            messages.error(request, "The quantity is invalid.")
+    return redirect("productmanage")
 
    

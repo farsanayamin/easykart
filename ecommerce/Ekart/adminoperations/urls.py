@@ -15,5 +15,12 @@ urlpatterns = [
     path("searchforproduct/", views.search_product, name="searchforproduct"),
     path("listproduct/<str:id>/", views.list_product, name="listproduct"),
     path("unlistproduct/<str:id>/", views.un_list_product, name="unlistproduct"),
+    path("addvariant/<int:pro_id>/", views.add_variant, name="addvariant"),
+    path(
+        "editvariantstock/<str:var_id>/",
+        views.edit_variant_stock,
+        name="editvariantstock",
+    ),
 
+    
 ]

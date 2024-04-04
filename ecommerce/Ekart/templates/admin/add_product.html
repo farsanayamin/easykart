@@ -28,7 +28,7 @@
 {% endif %}
 
 <div class="container-fluid">
-    <form class="form-horizontal" method="POST" action="{% url 'editproduct' product_id=product_id %}" enctype="multipart/form-data">
+    <form class="form-horizontal" method="POST" action="{% url 'addproduct'  %}" enctype="multipart/form-data">
 
         {% csrf_token %}
         <fieldset>
