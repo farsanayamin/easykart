@@ -113,7 +113,7 @@
                     <a href="/adminoperations/adminhome/" class="nav_link active"> <i title="Dashboard" class='bx bx-grid-alt nav_icon'></i> <span class="nav_name">Dashboard</span>  </a> 
                     <a href="/adminoperations/usermanage/" class="nav_link"> <i title="Users" class='bx bx-user nav_icon'></i> <span class="nav_name">Users</span> </a>
                     <a href="/adminoperations/productmanage/" class="nav_link"> <i title="Products"  class='bx bx-message-square-detail nav_icon'></i> <span class="nav_name">Products</span> </a>
-                    <a href="/category/" class="nav_link"> <i title="Categories" class='bx bx-bookmark nav_icon'></i> <span class="nav_name">Categories</span> </a> 
+                    <a href="/adminoperations/category/" class="nav_link"> <i title="Categories" class='bx bx-bookmark nav_icon'></i> <span class="nav_name">Categories</span> </a> 
                     <!--
                     <a href="/ordersmanage/" class="nav_link"> <i title="Orders" class='bx bx-folder nav_icon'></i> <span class="nav_name">Orders</span> </a>
                     <a href="/coupenmanage/" class="nav_link"> <i title="Coupon Management" class='bx bx-bar-chart-alt-2 nav_icon'></i> <span class="nav_name">Coupon Management</span> </a>
@@ -296,7 +296,7 @@
 
                         <div class="modal-dialog">
                             <div class="modal-content">
-                                <form action="/adminlogout/" method='POST'>
+                                <form action="/adminoperations/adminlogout/" method='POST'>
                                     {% csrf_token%}
                                     <div class="modal-header">
                                         <h4 class="modal-title">Logout</h4>
@@ -323,8 +323,15 @@
 
             <!-- logout modal0 -->
 
-           
-
+            <script>
+                // Redirect away from the homepage to prevent going back to it
+                if (window.history && window.history.pushState) {
+                    window.history.pushState(null, null, window.location.href);
+                    window.onpopstate = function() {
+                        window.history.pushState(null, null, window.location.href);
+                    };
+                }
+            </script>
 
             <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>

@@ -326,4 +326,95 @@ def edit_variant_stock(request, var_id):
             messages.error(request, "The quantity is invalid.")
     return redirect("productmanage")
 
+   #Category
    
+def show_category(request):
+    if request.user.is_authenticated:
+        items = Category.objects.all()
+        context = {"items": items}
+        return render(request, "admin/category_manage.html", context)
+    else:
+        return redirect("adminlogin")
+from django.shortcuts import render, HttpResponse   
+
+from django.utils.text import slugify
+
+def add_category(request):
+    if request.method == "POST":
+        name2 = request.POST.get("nameeee")
+        description = request.POST.get("desc")
+        if not Category.objects.filter(category_name=name2).exists():
+            # Generate slug from category_name
+            slug = slugify(name2)
+            
+            # Check if the generated slug already exists
+            if Category.objects.filter(slug=slug).exists():
+                # If slug already exists, add a unique identifier
+                slug = f"{slug}-{Category.objects.count()}"
+            
+            items = Category(category_name=name2, slug=slug, description=description)
+            items.save()
+            messages.success(request, "Category added successfully")
+            return redirect("category")  # Replace "category" with the appropriate URL name
+        else:
+            messages.error(request, "Category is already in the table")
+            return redirect("category")  # Replace "category" with the appropriate URL name
+
+    return render(request, "your_template.html")
+
+
+# edit category
+from django.shortcuts import get_object_or_404
+
+from django.http import HttpResponseRedirect
+
+def edit_category(request, id):
+    category = get_object_or_404(Category, pk=id)
+    
+    if request.method == "POST":
+        if "delete" in request.POST:
+            # If the delete button is clicked, delete the category
+            category.delete()
+            messages.success(request, "Category deleted successfully")
+            return redirect("category")
+        else:
+            # If it's a POST request for editing, update the description
+            description = request.POST["desc"]
+            category.description = description
+            category.save()
+            messages.success(request, "Category edited successfully")
+            return redirect("category")
+    
+    # If it's not a POST request, render the edit form
+    return render(request, "admin/category_manage.html", {"category": category})
+
+
+# search category
+def search(request):
+    if request.method == "POST":
+        query = request.POST["qry"]
+        obj = Category.objects.filter(category_name__icontains=query)
+        context = {"items": obj}
+    return render(request, "admin/category_manage.html", context)
+
+
+# list category
+def list_category(request, id):
+    obj = Category.objects.get(id=id)
+    obj.is_listed = True
+    obj.save()
+    return redirect("category")
+
+
+# un list category
+def un_list_category(request, id):
+    obj = Category.objects.get(id=id)
+    obj.is_listed = False
+    obj.save()
+    return redirect("category")
+
+@never_cache
+def admin_logout(request):
+    if request.user.is_authenticated:
+        request.session.flush()
+    return redirect("adminlogin")

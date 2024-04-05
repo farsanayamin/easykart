@@ -8,6 +8,7 @@ class Category(models.Model):
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField(max_length=225, blank=True)
     cat_image = models.ImageField(upload_to ='photos/categories',blank=True)
+    is_listed = models.BooleanField(default=True)
     
     class Meta:
         verbose_name = 'category'
