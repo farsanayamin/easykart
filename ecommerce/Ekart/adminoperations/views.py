@@ -51,14 +51,14 @@ def admin_home(request):
             end_week = start_week + timedelta(days=6)
             current_date = datetime.now().date()
     return render(request, 'admin/admin_home.html')
-
+'''
 # admin  logout
 @never_cache
 def admin_logout(request):
     if "username" in request.session:
         request.session.flush()
     return redirect("adminlogin")
-
+'''
 from django.shortcuts import render
 from django.contrib.auth.models import User
 
