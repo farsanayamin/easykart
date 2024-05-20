@@ -24,7 +24,7 @@
                         <!-- Start .row -->
                         <div class="col-lg-6">
                             <!-- col-lg-6 start here -->
-                            <div class="invoice-logo"><img src="{% static '/images/logo.png' %}" alt="Invoice logo" style="max-height: 40px;"></div>
+                            <h3 style="color: blue;">EasyKart</h3>
                         </div>
                         <!-- col-lg-6 end here -->
                         <div class="col-lg-6">
@@ -106,6 +106,10 @@
                     </div>
                     <!-- End .row -->
                 </div>
+            </div>
+            <div class="text-center">
+                <a href='{% url "download_invoice" order.id %}' class="btn btn-outline-secondary">Download Invoice</a> <br> 
+            
             </div>
             <!-- End .panel -->
         </div>

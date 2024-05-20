@@ -50,7 +50,7 @@
         </div> <!-- col.// -->
         <a href="{% url 'store' %}" class="btn btn-outline-primary">Store</a>
         <div class="col-lg  col-md-6 col-sm-12 col">
-            <form action="{% url 'search' %}" class="search" method="GET">
+            <form action="{% url 'searchitem' %}" class="search" method="GET">
                 <div class="input-group w-100">
                     <input type="text" class="form-control" style="width:60%;" placeholder="Search"  name="keyword">
                     
@@ -76,7 +76,7 @@
             <div class="widget-header">
               <small class="title text-muted">Welcome {{user.first_name}}!</small>
               <div>
-                <a href="#">Dashboard</a> <span class="dark-transp"> | </span>
+                <a href="{% url 'dashboard' %}">Dashboard</a> <span class="dark-transp"> | </span>
                 <a href="{% url 'logout' %}"> Logout</a>
               </div>
             </div>

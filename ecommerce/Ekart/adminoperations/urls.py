@@ -29,6 +29,13 @@ urlpatterns = [
     path("search/", views.search, name="search"),
     path("listcategory/<str:id>", views.list_category, name="listcategory"),
     path("unlistcategory/<str:id>", views.un_list_category, name="unlistcategory"),
-    path("adminlogout/", views.admin_login, name="adminlogout")
+    path("adminlogout/", views.admin_login, name="adminlogout"),
+    path("ordersmanage/", views.order_management, name="ordersmanage"),
+    path(
+        "moredetailsinadmin/<str:id>",
+        views.more_details_in_admin,
+        name="moredetailsinadmin",
+    ),
+    path("cancelorder/<str:id>", views.cancel_order, name="cancelorder")
     
 ]

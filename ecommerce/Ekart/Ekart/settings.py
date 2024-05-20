@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'adminoperations',
     'carts',
     'orders',
+    'addressbook',
+    'coupon'
 ]
 
 MIDDLEWARE = [

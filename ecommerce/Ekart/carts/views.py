@@ -13,6 +13,7 @@ def _cart_id(request):
         cart = request.session.create()
     return cart
 
+@login_required(login_url='login')
 def add_cart(request, product_id):
     current_user = request.user
     product = Product.objects.get(id=product_id) #get the product
@@ -196,7 +197,7 @@ def checkout(request, total=0, quantity=0, cart_items=None):
         if request.user.is_authenticated:
             cart_items = CartItem.objects.filter(user=request.user, is_active=True)
         else:
-            cart = Cart.objects.get(cart_id=_cart_id(request))
+            cart = Cart.objects.get(cart_id=_cart_id(request))#
             cart_items = CartItem.objects.filter(cart=cart, is_active=True)
         for cart_item in cart_items:
             total += (cart_item.product.price * cart_item.quantity)

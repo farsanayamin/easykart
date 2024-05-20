@@ -111,6 +111,11 @@
 
 						<div id="paypal-button-container">
 							<!-- PayPal Button Will Load -->
+							<form action="{% url 'cash_on_delivery' %}" method="post">
+								{% csrf_token %}
+								<input type="hidden" name="order_number" value="{{ order.order_number }}">
+								<button type='submit' class="btn btn-block btn-outline-warning mb-3 btn-lg">Cash on delivery</button>
+							</form>
 						</div>
 
 					</div> <!-- card-body.// -->

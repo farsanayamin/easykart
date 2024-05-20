@@ -418,3 +418,63 @@ def admin_logout(request):
     if request.user.is_authenticated:
         request.session.flush()
     return redirect("adminlogin")
+
+from orders.models import Order,OrderProduct
+
+def order_management(request):
+    if request.user.is_authenticated:
+        obj = Order.objects.all().order_by("-id")
+        context = {
+            "items": obj,
+        }
+        return render(request, "admin/order_management.html", context)
+    else:
+        return redirect("adminlogin")
+    
+from django.shortcuts import render, get_object_or_404
+from orders.models import OrderProduct
+
+
+
+
+
+
+
+def more_details_in_admin(request, id):
+    # Assuming 'id' is the order id
+    order = Order.objects.get(id=id)
+    
+    # Retrieve OrderProduct objects related to this Order
+    order_products = OrderProduct.objects.filter(order=order)
+    
+    context = {
+        "order": order,
+        "order_products": order_products,
+    }
+    print(context)
+    return render(request, "admin/more_details_order.html", context)
+
+from django.shortcuts import redirect
+from django.contrib import messages
+from orders.models import Order  # Import your Order model
+
+
+def cancel_order(request,order_id):
+    order = Order.objects.get(id = order_id, user=request.user )
+
+    order.status = 'Cancelled'
+    order.save()
+    return render(request, "admin/more_details_order.html")
+'''
+def cancel_order(request, order_id):
+    try:
+        order = Order.objects.get(pk=order_id)
+        # Add cancellation logic here
+        order.status = 'Cancelled'
+        order.save()
+        messages.success(request, 'Order successfully cancelled.')
+    except Order.DoesNotExist:
+        messages.error(request, 'Order does not exist.')
+    return redirect('order_details', order_id=order_id)  # Redirect to order details page
+
+'''

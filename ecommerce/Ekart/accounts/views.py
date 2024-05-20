@@ -7,15 +7,25 @@ from  .models import generate_otp,send_otp_email,is_otp_expired
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.hashers import make_password
+from addressbook.models import UserAddressBook
+from django.shortcuts import render, redirect, get_object_or_404
+from .forms import RegistrationForm, UserForm, UserProfileForm
+from .models import Account, UserProfile
+from orders.models import Order, OrderProduct
+from django.contrib import messages, auth
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 
-# email verification
-#from django.contrib.sites.shortcuts import get_current_site
-#from django.template.loader import render_to_string
-#from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-#from django.utils.encoding import force_bytes
-#from django.contrib.auth.tokens import default_token_generator
-#from django.core.mail import EmailMessage
+# Verification email
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import EmailMessage
 
+from carts.views import _cart_id
+from carts.models import Cart, CartItem
 #otp
 import random
 from django.conf import settings
@@ -138,36 +148,13 @@ from django.contrib import messages
 from .models import Account, generate_otp, send_otp_email
 
 from django.shortcuts import redirect
-'''
-@never_cache
-def forgotPassword(request):
-    if request.method == "POST":
-        email = request.POST.get("email")
-        try:
-            user = Account.objects.get(email=email)
-        except Account.DoesNotExist:
-            messages.error(request, "No account with that email address exists.")
-            return redirect("forgotPassword")
-    
-        # Assuming you have an `id` for the user, you need to pass it when redirecting
-        return redirect("reset_password", id=user.id)  # Pass the user ID
-        
-    return render(request, "accounts/forgotPassword.html")
-
-
-@never_cache
-def reset_password(request,id):
-    user = Account.objects.get(id=id)
-    return render(request, "accounts/reset_password.html",{'user': user})
-    
-
-'''
 
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import redirect
 
 from django.core.exceptions import ObjectDoesNotExist
+
 
 @never_cache
 def forgotPassword(request):
@@ -238,3 +225,111 @@ def reset_password(request, id, otp_verified):
         return render(request, "accounts/reset_password.html", {'id': id, 'otp_verified': otp_verified})
     else:
         return redirect("forgotPassword")  # Redirect back to OTP verification if OTP is not verified
+    
+
+@login_required(login_url='login')
+def my_orders(request):
+    orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
+    context = {
+        'orders': orders,
+    }
+    return render(request, 'accounts/my_orders.html', context)
+
+
+@login_required(login_url='login')
+def edit_profile(request):
+    userprofile = get_object_or_404(UserProfile, user=request.user)
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=request.user)
+        profile_form = UserProfileForm(request.POST, request.FILES, instance=userprofile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile has been updated.')
+            return redirect('edit_profile')
+    else:
+        user_form = UserForm(instance=request.user)
+        profile_form = UserProfileForm(instance=userprofile)
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form,
+        'userprofile': userprofile,
+    }
+    return render(request, 'accounts/edit_profile.html', context)
+
+
+@login_required(login_url='login')
+def change_password(request):
+    if request.method == 'POST':
+        current_password = request.POST['current_password']
+        new_password = request.POST['new_password']
+        confirm_password = request.POST['confirm_password']
+
+        user = Account.objects.get(username__exact=request.user.username)
+
+        if new_password == confirm_password:
+            success = user.check_password(current_password)
+            if success:
+                user.set_password(new_password)
+                user.save()
+                # auth.logout(request)
+                messages.success(request, 'Password updated successfully.')
+                return redirect('change_password')
+            else:
+                messages.error(request, 'Please enter valid current password')
+                return redirect('change_password')
+        else:
+            messages.error(request, 'Password does not match!')
+            return redirect('change_password')
+    return render(request, 'accounts/change_password.html')
+
+'''
+@login_required(login_url='login')
+def order_detail(request, order_id):
+    order_detail = OrderProduct.objects.filter(order__order_number=order_id)
+    order = Order.objects.get(order_number=order_id)
+    subtotal = 0
+    for i in order_detail:
+        subtotal += i.product_price * i.quantity
+
+    context = {
+        'order_detail': order_detail,
+        'order': order,
+        'subtotal': subtotal,
+    }
+    return render(request, 'accounts/order_detail.html', context)
+'''
+@login_required(login_url='login')
+def order_detail(request, order_id):
+    order = get_object_or_404(Order,id = order_id)
+    order_detail = OrderProduct.objects.filter(order=order)
+
+    subtotal = sum(item.product_price * item.quantity for item in order_detail)
+
+    context = {
+        'order_detail': order_detail,
+        'order': order,
+        
+        'subtotal': subtotal
+    }
+    return render(request, 'dashboard/order_detail.html', context)
+
+@login_required(login_url = 'login')
+def dashboard(request):
+    orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
+    orders_count = orders.count()
+
+    userprofile = UserProfile.objects.get(user_id=request.user.id)
+    context = {
+        'orders_count': orders_count,
+        'userprofile': userprofile,
+    }
+    return render(request, 'accounts/dashboard.html', context)
+
+
+def addressbook(request):
+    addresses = UserAddressBook.objects.filter(user = request.user)
+    context = {
+        'addresses':addresses
+    }
+    return render(request, 'accounts/addressbook.html', context)

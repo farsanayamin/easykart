@@ -1,0 +1,24 @@
+{% load static %}
+<script type="text/javascript" src="{% static 'js/product_filter.js' %}"></script>
+<h3 class="mb-4 border-bottom pb-1">Filters</h3>
+<!--Price Filter-->
+<div class="card mb-4">
+    <select name="sort" id="sort-list" class="form-control" onchange="location = finalurl();">
+        <option value="" id="placeholder" class="ordering" disabled selected hidden>Sort By</option>
+        <option id="price" value="variation.price" class="ordering">Price: Low to High</option>
+        <option id="-price" value="-variation.price" class="ordering">Price: High to Low</option>
+        <option id="product_name" value="product_name" class="ordering">Product Name</option>
+    </select>
+    <h6 class="card-header">Price</h6>
+    <div class="list-group list-group-flush">
+        <li class="list-group-item">
+            <input type="range" min="{{minMaxPrice.price__min}}" value="{{minMaxPrice.price__min}}" max="{{minMaxPrice.price__max}}" id="rangeInput" oninput="maxPrice.value=this.value" class="form-control"/>
+            <p>{{minMaxPrice.price__min}}-{{minMaxPrice.price__max}}</p>
+        </li>
+        <li class="list-group-item">
+            Max:<input type="number" class="form-control" value="{{minMaxPrice.price__min}}" min="{{minMaxPrice.price__min}}" max="{{minMaxPrice.price__max}}" id="maxPrice" onkeyup="rangeInput.value=this.value" />
+            <button class="btn btn-info btn-sm mt-1" id="priceFilterBtn">Filter</button>
+        </li>
+    
+    </div>
+</div>    

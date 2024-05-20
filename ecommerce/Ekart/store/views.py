@@ -68,7 +68,8 @@ def product_detail(request, category_slug, product_slug):
     return render(request, 'store/product_detail.html', context)
 
 
-def search(request):
+def searchitem(request):
+    context ={}
     if 'keyword' in request.GET:
         keyword = request.GET['keyword']
         if keyword:
@@ -103,5 +104,38 @@ def submit_review(request, product_id):
                 data.save()
                 messages.success(request, 'Thank you! Your review has been submitted.')
                 return redirect(url)
+from django.http import JsonResponse
+from django.template.loader import render_to_string          
+
+def filter_data(request):
+    colors=request.GET.getlist('color[]')
+    categories=request.GET.getlist('category[]')
+    brands=request.GET.getlist('brand[]')
+    sizes=request.GET.getlist('size[]')
+    minPrice = request.GET['minPrice']
+    maxPrice = request.GET['maxPrice']
+    sort = request.GET['sort']
+
+    allProducts = Product.objects.all().distinct().order_by('-id')
+
+    allProducts = allProducts.filter(variation__price__gte = minPrice)
+    allProducts = allProducts.filter(variation__price__lte = maxPrice)
+    if len(colors) > 0:
+        allProducts = allProducts.filter(variation__color__in=colors).distinct()
+
+    if len(sizes) > 0:
+        allProducts = allProducts.filter(variation__size__in=sizes).distinct()
+
+    if len(categories) > 0:
+        allProducts = allProducts.filter(category__id__in =categories).distinct()
+
+    if len(brands) > 0:
+        allProducts = allProducts.filter(brand__id__in =brands).distinct()
+
+    if sort:
+        allProducts = allProducts.order_by(sort)
+        
+    t = render_to_string('ajax/product-list.html', {'products': allProducts })
+    return JsonResponse({'data' : t})
             
 
